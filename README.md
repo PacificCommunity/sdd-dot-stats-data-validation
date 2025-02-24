@@ -1,10 +1,13 @@
-# PDH SDD GitHub's template
+# PDH .STATS Data validation
 
-A general template for SDD/PDH projects, incorporating some good practices for github based development.
+A general validation of the data in the.STATS environment.
 
 # Usage
 
-To use this template create a new repository using this repository as a template. See in the top right corner of this page the green button "Use this template". Click on it and follow the instructions. This will create a new repository with the same structure as this one. Then clone the new repository to your local machine and start working on your project.
+This project is used mainly to generate the following validations and checks from the PDH .STATS:
+  - Data owners validation list
+  - Data gaps by data flows validation list
+  - Data flows records population trend
 
 # Folder structure
 
