@@ -9,10 +9,12 @@ source("setup.R")
 workBook <- createWorkbook()
 wb <- createWorkbook()
 
-dfList <- dfList |> select(id, Name.en)
+dfList <- dfList |> select(id, Name.en) |> rename(Label = Name.en)
 dfList <- dfList |> distinct()
 
 finList <- read.csv("../raw_data/finList.csv")
+finList <- finList |> select(id, Date, records) 
+  
 sheetName = "df_records"
 
 #Initialize counter
@@ -30,16 +32,19 @@ while (counter <= list){
   
   df_rec <- df_rec |> 
     mutate(id = selected_df$id,
-           Date = paste0(day(Sys.Date()),"/",month(Sys.Date()),"/",year(Sys.Date())),
-           Label = ""
+           Date = paste0(day(Sys.Date()),"/",month(Sys.Date()),"/",year(Sys.Date()))
            ) |>
-    group_by(id, Date, Label) |>
+    group_by(id, Date) |>
     summarise(records = n())
   
   finList <- rbind(finList, df_rec)  
   
   counter <- counter + 1 
 }
+
+#get the data flow label
+finList <- merge(finList, dfList, by = "id")
+finList$Date <- dmy(finList$Date)
 
 #Add data to excel workbook
 addWorksheet(wb, sheetName)
@@ -48,4 +53,6 @@ writeData(wb, sheet = sheetName, finList)
 #Write final file to output folder
 saveWorkbook(wb, file = "../output/dataflow_records_trend.xlsx", overwrite = TRUE)
 
+#Replace existing finList.csv file
+write.csv(finList, "../raw_data/finList.csv", row.names = FALSE)
 
