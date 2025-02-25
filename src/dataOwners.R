@@ -24,3 +24,17 @@ df_owners <- df_owners |>
 #Write df_owners table to output folder
 write.csv(df_owners, "../output/data owners list.csv", row.names = FALSE)
 
+#### ************************** Data Owners processing ************************************ ####
+
+datOwners <- read.csv("../raw_data/dataOwners.csv")
+
+datOwners <- datOwners |>
+  select(id, Label, respDept, respSect, respTopic, contactPerson)
+
+
+
+
+
+
+
+
