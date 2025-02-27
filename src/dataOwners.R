@@ -8,7 +8,6 @@ source("setup.R")
 #Read in the previous updates
 updateList <- read.csv("../raw_data/updateList.csv")
 
-
 #### ************************** Generate dataflow owners list ************************************ ####
 
 updateList$id <- updateList$template
@@ -28,8 +27,20 @@ write.csv(df_owners, "../output/data owners list.csv", row.names = FALSE)
 
 datOwners <- read.csv("../raw_data/dataOwners.csv")
 
-datOwners <- datOwners |>
-  select(id, Label, respDept, respSect, respTopic, contactPerson)
+colType <- data.frame(
+  id = c(1, 2),
+  colTypeDesc = c("Web harvesting", "Manual collection") 
+)
+
+status <- data.frame(
+  id = c(1, 2),
+  statusDesc = c("Active", "archived")
+)
+
+
+
+
+
 
 
 
