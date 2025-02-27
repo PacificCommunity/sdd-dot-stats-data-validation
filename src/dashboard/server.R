@@ -137,10 +137,30 @@ server <- function(input, output) {
     
   })
   
+  output$dataGap <- renderDataTable({
+    #colTrend <- read.csv("../../raw_data/finList.csv")
+    
+    #df <- colTrend |> filter(id == input$datFlow)
+    
+    dataTrend <- dataManual_Harvest_Owner %>%
+      filter(provid == input$datFlow)
+    
+    provSelectedSummary <<- provSelected
+    
+    plot_ly(provSelectedSummary, x = ~acname, y = ~frHouseholds, type = 'bar', name = 'Baseline') %>%
+      add_trace(y = ~colHouseholds, name='Collection')
+    
+  })
   
   
-  
-  
+  output$dataTrend <- DT::renderDataTable({
+    
+    dataTrend_DT <- dataManual_Harvest_Owner |>
+      filter(id == input$datFlow) |>
+      select(respDept, respSect, respTopic, colDate, upDate, totRec, newRec, editRec)
+    
+    datatable(dataTrend_DT)
+  })
   
   
 }
