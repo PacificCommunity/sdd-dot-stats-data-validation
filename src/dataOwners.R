@@ -6,19 +6,21 @@ setwd(repository)
 source("setup.R")
 
 #Read in the previous updates
-updateList <- read.csv("../raw_data/updateList.csv")
+dataOwners <- read.csv("../raw_data/dataOwners.csv")
 
 #### ************************** Generate dataflow owners list ************************************ ####
 
-updateList$id <- updateList$template
-updateList <- updateList |> select(id, Label, ownInd)
+#updateList <- updateList |> rename(id = template)
+dataOwners <- dataOwners |> select(id, Label, respDept, respSect, respTopic, contactPerson)
 
-pdh_df_list <- dfList |> select(id, Name.en) |> rename(Label = Name.en)
+dfList <- dfList |> select(id, Name.en) |> rename(Label = Name.en)
 
-df_owners <- merge(updateList, pdh_df_list, all = TRUE)
+df_owners <- merge(dataOwners, dfList, all = TRUE)
+
 df_owners <- df_owners |>
-  mutate(ownInd = ifelse(is.na(ownInd), "No owner", ownInd)) |>
-  rename(dataOwner = ownInd)
+  filter(!is.na(respDept)) |>
+  mutate(ownInd = ifelse(is.na(contactPerson), "No owner", contactPerson))
+  
 
 #Write df_owners table to output folder
 write.csv(df_owners, "../output/data owners list.csv", row.names = FALSE)
