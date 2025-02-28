@@ -45,6 +45,14 @@ collection <- sum(dataManual_Harvest_Owner$totRec)
 newRec <- sum(dataManual_Harvest_Owner$newRec)
 editRec <- sum(dataManual_Harvest_Owner$editRec)
 
+# Data owner groupings sub-tables
+
+#deptGroup <- dataOwners |> filter(respDept !="") |> group_by(respDept) |> summarise(numDF = n())
+sectGroup <- dataOwners |> filter(respSect !="") |> group_by(respSect) |> summarise(numDF = n())
+indvGroup <- dataOwners |> filter(contactPerson !="") |> group_by(contactPerson) |> summarise(numDF = n())
+
+
+#### *********************** Server section ************************************ ####
 
 # Server: Backend logic
 server <- function(input, output) {
@@ -162,6 +170,39 @@ server <- function(input, output) {
     datatable(dataTrend_DT)
   })
   
+  
+  output$sectDataOwner <- DT::renderDataTable({
+    sectDF <- dataOwners
+    
+    sectDF <- sectDF |>
+      filter(respSect == input$section) |>
+      
+    datatable(sectDF)
+  })
+  
+  output$indvDataOwner <- DT::renderDataTable({
+    indvDF <- dataOwners
+    
+    indvDF <- indvDF |>
+      filter(contactPerson == input$owner) |>
+      
+      datatable(indvDF)
+  })
+  
+
+  output$histRecords <- DT::renderDataTable({
+    histRecs <- read.csv("../../raw_data/finList.csv")
+    
+    histRecs <- histRecs |>
+      select(-total) |>
+      rename("2022" = X2022, "2023" = X2023, "2025" = X2025)
+    
+      datatable(histRecs)
+  })
+  
+  
+  
+    
   
 }
 

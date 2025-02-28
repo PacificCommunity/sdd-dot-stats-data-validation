@@ -8,9 +8,8 @@ library(ggplot2)
 repository <- file.path(dirname(rstudioapi::getSourceEditorContext()$path))
 setwd(repository)
 
-
 shinyUI(dashboardPage(
-  dashboardHeader(title = "PDH .STATS Dashboard"),
+  dashboardHeader(title = "PDH .STAT Dashboard"),
   dashboardSidebar(
     sidebarMenu(
       menuItem(actionButton("do", "Download Update"),
@@ -18,13 +17,11 @@ shinyUI(dashboardPage(
       ),
       menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
       menuItem("Data Owners", tabName = "datOwner", icon = icon("bar-chart-o"),
-               startExpanded = TRUE,
-               menuSubItem("Department Owner",
-                           tabName = "deptOwner"),
+               startExpanded = FALSE,
                menuSubItem("Section Owner",
-                           tabName = "secOwner"),
+                           tabName = "sectOwner"),
                menuSubItem("Individual Owner",
-                           tabName = "intOwner"
+                           tabName = "indvOwner"
                )
       ),
       menuItem("Data Collections", tabName = "dataCol", icon = icon("bar-chart-o")),
@@ -56,11 +53,20 @@ shinyUI(dashboardPage(
               ),
               
               ),
-      tabItem(tabName = "datOwner",
-              fluidRow(hr(h2("Data Flows Data Owners"))),
-              fluidRow(hr(h2("Table showing the Collections by Province"))),
-              fluidRow(dataTableOutput("provinceDataTable"))  
+      tabItem(tabName = "sectOwner", h2("Section Data Flows Owners"),
+              fluidRow(
+                selectInput("section", "Select section:", choices = sectGroup$respSect, selected = 1)),
+              fluidRow(hr(h2("Table showing the Data flows with ownership from selected section"))),
+              fluidRow(dataTableOutput("sectDataOwner"))  
               
+      ),
+      
+      tabItem(tabName = "indvOwner", h2("Individial data flow owners"),
+              fluidRow(
+                selectInput("owner", "Select Individual owner:", choices = indvGroup$contactPerson, selected = 1 )),
+              fluidRow(hr(h2("Table showing the Data flows with ownership from the selected inidividual"))),
+              fluidRow(dataTableOutput("indvDataOwner"))
+      
       ),
       
       tabItem(tabName = "dataCol", h2("Data Collections / Harvesting"),
@@ -72,22 +78,18 @@ shinyUI(dashboardPage(
               
       ),
       
-      tabItem(tabName = "provinceInterviewStatuses",
-              fluidRow(hr(h2("Iinterview Statuses BY Province"))),
-              fluidRow(plotOutput("interviewStatusGGPlot"))
-              
+      tabItem(tabName = "histUpdates",
+              fluidRow(hr(h2("Historical DF Updates by Year"))),
+              fluidRow(dataTableOutput("histRecords"))
               
       ),
       
       tabItem(tabName = "enumeration", h1("Check by Enumeration"),
-              #fluidRow(selectInput("province", "Select province:", choices = c("Torba" = 1, "Sanma" = 2, "Penama" = 3, "Malampa" = 4, "Shefa" = 5, "Tafea" = 6), selected = 1))
-              
-              
+
       ),
       tabItem(tabName = "interviewer", h1("Check by Interviewer")
               
       ),
-      
       
       tabItem(tabName = "interviews", h1("Check by Interviewer")
               
