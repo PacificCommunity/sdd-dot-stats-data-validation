@@ -43,7 +43,8 @@ while (counter <= list){
   #Add data to excel workbook
   addWorksheet(wb, selected_df)
   writeData(wb, sheet = selected_df, df_rec_summary)
-    } else{
+    
+  } else{
       
     }
   
