@@ -9,6 +9,7 @@ library(DT) #Load Datatable library
 library(chron) # Load shron library for date manipulation
 library(shinycssloaders) #Load shiny css library
 library(lubridate) #Data manipulation library
+library(rsdmx)
 
 #Map directory
 repository <- file.path(dirname(rstudioapi::getSourceEditorContext()$path))
@@ -16,16 +17,18 @@ setwd(repository)
 
 #### *********************** Load datasets ****************************** ####
 
-datOwners <- read.csv("../../raw_data/dataOwners.csv")
+dfList <- as.data.frame(readSDMX(providerId = "PDH", resource = "dataflow"))
+
+datOwners <- read.csv("dataOwners.csv")
 
 datOwners <- datOwners |>
   select(id, Label, respDept, respSect, respTopic, contactPerson, colType, status)
 
-dataManual <- read.csv("../../raw_data/dataManual.csv")
+dataManual <- read.csv("dataManual.csv")
 dataManual <- dataManual |>
   select(id, colDate, upDate, totRec, newRec, editRec)
 
-dataHarvest <- read.csv("../../raw_data/dataharvesting.csv")
+dataHarvest <- read.csv("dataharvesting.csv")
 dataHarvest <- dataHarvest |>
   select(id, colDate, upDate, totRec, newRec, editRec)
 
@@ -48,8 +51,9 @@ editRec <- sum(dataManual_Harvest_Owner$editRec)
 # Data owner groupings sub-tables
 
 #deptGroup <- dataOwners |> filter(respDept !="") |> group_by(respDept) |> summarise(numDF = n())
-sectGroup <- dataOwners |> filter(respSect !="") |> group_by(respSect) |> summarise(numDF = n())
-indvGroup <- dataOwners |> filter(contactPerson !="") |> group_by(contactPerson) |> summarise(numDF = n())
+sectGroup <- datOwners |> filter(respSect !="") |> group_by(respSect) |> summarise(numDF = n())
+indvGroup <- datOwners |> filter(contactPerson !="") |> group_by(contactPerson) |> summarise(numDF = n())
+
 
 
 #### *********************** Server section ************************************ ####
@@ -59,7 +63,7 @@ server <- function(input, output) {
   
   #Calculate the percentage of new collections
   output$newCollection <- renderInfoBox({
-      precentageNew <- round(newRec/collection * 100, digits = 2)
+    precentageNew <- round(newRec/collection * 100, digits = 2)
     
     infoBox(
       "Overall Percentage of New records", paste0(precentageNew, "%"), icon = icon("list"),
@@ -177,7 +181,7 @@ server <- function(input, output) {
     sectDF <- sectDF |>
       filter(respSect == input$section) |>
       
-    datatable(sectDF)
+      datatable(sectDF)
   })
   
   output$indvDataOwner <- DT::renderDataTable({
@@ -189,20 +193,55 @@ server <- function(input, output) {
       datatable(indvDF)
   })
   
-
+  
   output$histRecords <- DT::renderDataTable({
-    histRecs <- read.csv("../../raw_data/finList.csv")
+    histRecs <- read.csv("finList.csv")
     
     histRecs <- histRecs |>
       select(-total) |>
       rename("2022" = X2022, "2023" = X2023, "2025" = X2025)
     
-      datatable(histRecs)
+    datatable(histRecs)
   })
   
   
+  dfName <- reactive({
+    df <- input$dfName
+    dfData <- as.data.frame(readSDMX(providerId="PDH", resource="data", flowRef= df))
+    
+    dfData <- dfData |>
+      filter(nchar(obsTime) == 4) |>
+      group_by(GEO_PICT, obsTime) |>
+      summarise(totRec = n())
+    
+    #contract pivot-wider table
+    dfSummary <- pivot_wider(
+      dfData,
+      names_from = GEO_PICT,
+      values_from = totRec
+    )
+    
+    dfSummary <- dfSummary |> 
+      mutate(across(-obsTime, ~ ifelse(is.na(.), "No data", "Data"))) |>
+      rename(Year = obsTime)
+    
+  })
   
+  #Function to produce the data gap table
+  
+    output$dataGap <- DT::renderDataTable({
+      
+      datTable <- dfName()
+      
+      datatable(datTable) %>%
+        formatStyle(
+          columns = colnames(datTable),                # Apply styling to all columns
+          target = "cell",
+          backgroundColor = styleEqual("No data", "red", "green") # Set red background if cell equals "No Data"
+        )
+      
+    })
     
   
-}
+} #End server funtion
 

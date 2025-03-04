@@ -3,6 +3,7 @@ library(shiny)
 library(plotly)
 library(DT)
 library(ggplot2)
+library(rsdmx)
 
 
 repository <- file.path(dirname(rstudioapi::getSourceEditorContext()$path))
@@ -12,9 +13,6 @@ shinyUI(dashboardPage(
   dashboardHeader(title = "PDH .STAT Dashboard"),
   dashboardSidebar(
     sidebarMenu(
-      menuItem(actionButton("do", "Download Update"),
-               shinycssloaders::withSpinner(textOutput("complete"))
-      ),
       menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
       menuItem("Data Owners", tabName = "datOwner", icon = icon("bar-chart-o"),
                startExpanded = FALSE,
@@ -25,8 +23,9 @@ shinyUI(dashboardPage(
                )
       ),
       menuItem("Data Collections", tabName = "dataCol", icon = icon("bar-chart-o")),
-      menuItem("Historical updates", tabName = "histUpdates", icon = icon("bar-chart-o"))#,
-          
+      menuItem("Historical updates", tabName = "histUpdates", icon = icon("bar-chart-o")),
+      menuItem("Data Gaps", tabName = "dataGap", icon = icon("bar-chart-o"))
+      
     )
   ),
   
@@ -37,7 +36,7 @@ shinyUI(dashboardPage(
               fluidRow(
                 infoBoxOutput("newCollection", width = 4),
                 infoBoxOutput("editCollection", width = 4)
-               
+                
               ),
               
               fluidRow(hr(h2("Collections through Harvesting"))),
@@ -52,7 +51,7 @@ shinyUI(dashboardPage(
                 infoBoxOutput("manualEditCollection", width = 4)
               ),
               
-              ),
+      ),
       tabItem(tabName = "sectOwner", h2("Section Data Flows Owners"),
               fluidRow(
                 selectInput("section", "Select section:", choices = sectGroup$respSect, selected = 1)),
@@ -66,7 +65,7 @@ shinyUI(dashboardPage(
                 selectInput("owner", "Select Individual owner:", choices = indvGroup$contactPerson, selected = 1 )),
               fluidRow(hr(h2("Table showing the Data flows with ownership from the selected inidividual"))),
               fluidRow(dataTableOutput("indvDataOwner"))
-      
+              
       ),
       
       tabItem(tabName = "dataCol", h2("Data Collections / Harvesting"),
@@ -84,8 +83,13 @@ shinyUI(dashboardPage(
               
       ),
       
-      tabItem(tabName = "enumeration", h1("Check by Enumeration"),
-
+      tabItem(tabName = "dataGap", h1("Data Gap Analysis"),
+              fluidRow(
+                selectInput("dfName", "Select Data Flow:", choices = dfList$id, selected = 1)
+              ),
+              fluidRow(hr(h2("Table showing data gaps in collections as per selected data flow"))),
+              fluidRow(dataTableOutput("dataGap"))
+              
       ),
       tabItem(tabName = "interviewer", h1("Check by Interviewer")
               
@@ -93,12 +97,10 @@ shinyUI(dashboardPage(
       
       tabItem(tabName = "interviews", h1("Check by Interviewer")
               
-              
       )
       
     )
   )
 )
 )
-  
-  
+
