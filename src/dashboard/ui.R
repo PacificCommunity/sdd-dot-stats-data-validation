@@ -5,7 +5,6 @@ library(DT)
 library(ggplot2)
 library(rsdmx)
 
-
 repository <- file.path(dirname(rstudioapi::getSourceEditorContext()$path))
 setwd(repository)
 
@@ -25,6 +24,7 @@ shinyUI(dashboardPage(
       menuItem("Data Collections", tabName = "dataCol", icon = icon("bar-chart-o")),
       menuItem("Historical updates", tabName = "histUpdates", icon = icon("bar-chart-o")),
       menuItem("Data Gaps", tabName = "dataGap", icon = icon("bar-chart-o")),
+      menuItem("Dataset Registration", tabName = "datReg", icon = icon("bar-chart-o")),
       menuItem("Data Entry", tabName = "dataEntry", icon = icon("bar-chart-o"))
       
     )
@@ -93,18 +93,30 @@ shinyUI(dashboardPage(
               
       ),
       
+      tabItem(tabName = "datReg", h2("Incoming dataset registration"),
+              fluidRow(selectInput("dataFlow", "Select data flow:", choices = dfList$id, selected = 1)),
+              fluidRow(dateInput("recDate", "Enter date received:", format = "yyyy-mm-dd")),
+              fluidRow(textInput("sender", "Enter the name of the Sender:")),
+              fluidRow(selectInput("producer", "Select where the data is coming from:", choices = datProducers$producerID, multiple = TRUE)),
+              fluidRow(selectInput("chanType", "Select channel through data was received:", choices = c("Email" = 1, "Web harvesting" = 2, "File transfer" = 3)))
+              ),
+      
       tabItem(tabName = "dataEntry", h2("Manual Uploaded register update"),
               fluidRow(hr()),
-              fluidRow(textInput("name", "Name")),
-              fluidRow(numericInput("age", "Age", value = NULL, min = 1)),
-              fluidRow(selectInput("gender", "Gender", choices = c("Male", "Female", "Other"))),
-              fluidRow(textInput("city", "City")),
+              fluidRow(selectInput("dataFlow", "Select data flow:", choices = dfList$id, selected = 1)),
+              fluidRow(selectInput("colType", "Select the Collection type:", choices = c("Manual Collection" = 1, "Harvesting" = 2))),
+              fluidRow(dateInput("colDate", "Collection Date", format = "yyyy-mm-dd"),
+                       dateInput("upDate", "Upload Date", format = "yyyy-mm-dd")
+                       ),
+              fluidRow(numericInput("totRec", "Total records", 0)),
+              fluidRow(numericInput("newRec", "New records", 0)),
+              fluidRow(numericInput("editRec", "Edited records", 0)),
+              fluidRow(hr()),
               fluidRow(actionButton("submit", "Submit")),
               fluidRow(actionButton("clear", "Clear Data")),
               fluidRow(DTOutput("table")),
               fluidRow(downloadButton("download", "Download Data"))
               )
-      
     )
   )
 )
