@@ -19,16 +19,16 @@ setwd(repository)
 
 dfList <- as.data.frame(readSDMX(providerId = "PDH", resource = "dataflow"))
 
-datOwners <- read.csv("dataOwners.csv")
+datOwners <- read.csv("../../raw_data/dataOwners.csv")
 
 datOwners <- datOwners |>
   select(id, Label, respDept, respSect, respTopic, contactPerson, colType, status)
 
-dataManual <- read.csv("dataManual.csv")
+dataManual <- read.csv("../../raw_data/dataManual.csv")
 dataManual <- dataManual |>
   select(id, colDate, upDate, totRec, newRec, editRec)
 
-dataHarvest <- read.csv("dataharvesting.csv")
+dataHarvest <- read.csv("../../raw_data/dataharvesting.csv")
 dataHarvest <- dataHarvest |>
   select(id, colDate, upDate, totRec, newRec, editRec)
 
@@ -59,7 +59,7 @@ indvGroup <- datOwners |> filter(contactPerson !="") |> group_by(contactPerson) 
 #### *********************** Server section ************************************ ####
 
 # Server: Backend logic
-server <- function(input, output) {
+server <- function(input, output, session) {
   
   #Calculate the percentage of new collections
   output$newCollection <- renderInfoBox({
@@ -195,7 +195,7 @@ server <- function(input, output) {
   
   
   output$histRecords <- DT::renderDataTable({
-    histRecs <- read.csv("finList.csv")
+    histRecs <- read.csv("../../raw_data/finList.csv")
     
     histRecs <- histRecs |>
       select(-total) |>
@@ -241,6 +241,47 @@ server <- function(input, output) {
         )
       
     })
+    
+    
+#### *************************** Data Entry Section **************************** ####
+
+    # Reactive dataframe
+    data <- reactiveVal(data.frame(Name = character(), Age = numeric(), Gender = character(), City = character(), stringsAsFactors = FALSE))
+    
+    # Append data when Submit button is clicked
+    observeEvent(input$submit, {
+      new_entry <- data.frame(
+        Name = input$name,
+        Age = input$age,
+        Gender = input$gender,
+        City = input$city,
+        stringsAsFactors = FALSE
+      )
+      data(rbind(data(), new_entry))
+      
+      # Reset input fields
+      updateTextInput(session, "name", value = "")
+      updateNumericInput(session, "age", value = NULL)
+      updateTextInput(session, "city", value = "")
+    })
+    
+    # Clear all data
+    observeEvent(input$clear, {
+      data(data.frame(Name = character(), Age = numeric(), Gender = character(), City = character(), stringsAsFactors = FALSE))
+    })
+    
+    # Render table
+    output$table <- renderDT({
+      datatable(data(), editable = TRUE)
+    })
+    
+    # Download data
+    output$download <- downloadHandler(
+      filename = function() { "data_entry.csv" },
+      content = function(file) {
+        write.csv(data(), file, row.names = FALSE)
+      }
+    )
     
   
 } #End server funtion

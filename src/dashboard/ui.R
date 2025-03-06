@@ -24,7 +24,8 @@ shinyUI(dashboardPage(
       ),
       menuItem("Data Collections", tabName = "dataCol", icon = icon("bar-chart-o")),
       menuItem("Historical updates", tabName = "histUpdates", icon = icon("bar-chart-o")),
-      menuItem("Data Gaps", tabName = "dataGap", icon = icon("bar-chart-o"))
+      menuItem("Data Gaps", tabName = "dataGap", icon = icon("bar-chart-o")),
+      menuItem("Data Entry", tabName = "dataEntry", icon = icon("bar-chart-o"))
       
     )
   ),
@@ -91,13 +92,18 @@ shinyUI(dashboardPage(
               fluidRow(dataTableOutput("dataGap"))
               
       ),
-      tabItem(tabName = "interviewer", h1("Check by Interviewer")
-              
-      ),
       
-      tabItem(tabName = "interviews", h1("Check by Interviewer")
-              
-      )
+      tabItem(tabName = "dataEntry", h2("Manual Uploaded register update"),
+              fluidRow(hr()),
+              fluidRow(textInput("name", "Name")),
+              fluidRow(numericInput("age", "Age", value = NULL, min = 1)),
+              fluidRow(selectInput("gender", "Gender", choices = c("Male", "Female", "Other"))),
+              fluidRow(textInput("city", "City")),
+              fluidRow(actionButton("submit", "Submit")),
+              fluidRow(actionButton("clear", "Clear Data")),
+              fluidRow(DTOutput("table")),
+              fluidRow(downloadButton("download", "Download Data"))
+              )
       
     )
   )
