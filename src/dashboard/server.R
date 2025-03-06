@@ -16,9 +16,10 @@ repository <- file.path(dirname(rstudioapi::getSourceEditorContext()$path))
 setwd(repository)
 
 #### *********************** Load datasets ****************************** ####
-
+#Get dataflow list from PDH .STAT
 dfList <- as.data.frame(readSDMX(providerId = "PDH", resource = "dataflow"))
 
+datProducers <- read.csv("../../raw_data/datProducers.csv")
 datOwners <- read.csv("../../raw_data/dataOwners.csv")
 
 datOwners <- datOwners |>
@@ -53,8 +54,6 @@ editRec <- sum(dataManual_Harvest_Owner$editRec)
 #deptGroup <- dataOwners |> filter(respDept !="") |> group_by(respDept) |> summarise(numDF = n())
 sectGroup <- datOwners |> filter(respSect !="") |> group_by(respSect) |> summarise(numDF = n())
 indvGroup <- datOwners |> filter(contactPerson !="") |> group_by(contactPerson) |> summarise(numDF = n())
-
-
 
 #### *********************** Server section ************************************ ####
 
@@ -242,32 +241,53 @@ server <- function(input, output, session) {
       
     })
     
+
     
 #### *************************** Data Entry Section **************************** ####
 
     # Reactive dataframe
-    data <- reactiveVal(data.frame(Name = character(), Age = numeric(), Gender = character(), City = character(), stringsAsFactors = FALSE))
+     data <- reactiveVal(data.frame(id = character(),
+                                    colType = numeric(),
+                                    colDate = as.Date(character()), 
+                                    upDate = as.Date(character()), 
+                                    totRec = numeric(), 
+                                    newRec = numeric(), 
+                                    editRec = numeric(), 
+                                    stringsAsFactors = FALSE))
     
     # Append data when Submit button is clicked
     observeEvent(input$submit, {
       new_entry <- data.frame(
-        Name = input$name,
-        Age = input$age,
-        Gender = input$gender,
-        City = input$city,
+        id = input$dataFlow,
+        colType = input$colType,
+        colDate = as.Date(input$colDate),
+        upDate = as.Date(input$upDate),
+        totRec = input$totRec,
+        newRec = input$newRec,
+        editRec = input$editRec,
         stringsAsFactors = FALSE
       )
       data(rbind(data(), new_entry))
       
       # Reset input fields
-      updateTextInput(session, "name", value = "")
-      updateNumericInput(session, "age", value = NULL)
-      updateTextInput(session, "city", value = "")
+      updateTextInput(session, "id", value = "")
+      updateNumericInput(session, "colType", value = "")
+      updateTextInput(session, "colDate", value = NULL)
+      updateTextInput(session, "upDate", value = "")
+      updateNumericInput(session, "totRec", value = "")
+      updateNumericInput(session, "newRec", value = "")
+      updateNumericInput(session, "editRec", value = "")
     })
     
     # Clear all data
     observeEvent(input$clear, {
-      data(data.frame(Name = character(), Age = numeric(), Gender = character(), City = character(), stringsAsFactors = FALSE))
+      data(data.frame(id = character(), 
+                      colDate = as.Date(character()), 
+                      upDate = as.Date(character()), 
+                      totRec = numeric(), 
+                      newRec = numeric(), 
+                      editRec = numeric(),  
+                      stringsAsFactors = FALSE))
     })
     
     # Render table
