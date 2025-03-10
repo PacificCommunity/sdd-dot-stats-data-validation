@@ -22,32 +22,16 @@ dfList <- as.data.frame(readSDMX(providerId = "PDH", resource = "dataflow"))
 datProducers <- read.csv("../../raw_data/datProducers.csv")
 datOwners <- read.csv("../../raw_data/dataOwners.csv")
 
-datOwners <- datOwners |>
+  datOwners <- datOwners |>
   select(id, Label, respDept, respSect, respTopic, contactPerson, colType, status)
 
-dataManual <- read.csv("../../raw_data/dataManual.csv")
-dataManual <- dataManual |>
-  select(id, colDate, upDate, totRec, newRec, editRec)
+colData <- read.csv("../../raw_data/colData.csv")
 
-dataHarvest <- read.csv("../../raw_data/dataharvesting.csv")
-dataHarvest <- dataHarvest |>
-  select(id, colDate, upDate, totRec, newRec, editRec)
+colData <- colData |> filter(!is.na(totRec) & !is.na(newRec) & !is.na(editRec)) 
 
-dataManual_Harvest <- rbind(dataManual, dataHarvest)
-dataManual_Harvest_Owner <- merge(datOwners, dataManual_Harvest, by = "id")
-
-dataManual_Harvest_Owner <- dataManual_Harvest_Owner |>
-  mutate(totRec = as.numeric(totRec),
-         newRec = as.numeric(newRec),
-         editRec = as.numeric(editRec),
-         colDate = dmy(colDate),
-         upDate = dmy(upDate)
-  )
-dataManual_Harvest_Owner <- na.omit(dataManual_Harvest_Owner)
-
-collection <- sum(dataManual_Harvest_Owner$totRec)
-newRec <- sum(dataManual_Harvest_Owner$newRec)
-editRec <- sum(dataManual_Harvest_Owner$editRec)
+collection <- sum(colData$totRec)
+newRec <- sum(colData$newRec)
+editRec <- sum(colData$editRec)
 
 # Data owner groupings sub-tables
 
@@ -85,10 +69,13 @@ server <- function(input, output, session) {
   
   #Harvesting Collections rate
   output$harvestNewCollection <- renderInfoBox({
-    harvestNewRec <- dataManual_Harvest_Owner |>
-      filter(colType == 1) |> summarise(tot = sum(newRec))
-    harvestTotal <- dataManual_Harvest_Owner |>
-      filter(colType == 1) |> summarise(tot = sum(totRec))
+    harvestNewRec <- colData |>
+      filter(collectType == 1) |> 
+      summarise(tot = sum(newRec))
+    
+    harvestTotal <- colData |>
+      filter(collectType == 1) |> 
+      summarise(tot = sum(totRec))
     
     precentageNew <- round(harvestNewRec$tot/harvestTotal$tot * 100, digits = 2)
     
@@ -101,10 +88,13 @@ server <- function(input, output, session) {
   
   
   output$harvestEditCollection <- renderInfoBox({
-    harvestEditRec <- dataManual_Harvest_Owner |>
-      filter(colType == 1) |> summarise(tot = sum(editRec))
-    harvestTotal <- dataManual_Harvest_Owner |>
-      filter(colType == 1) |> summarise(tot = sum(totRec))
+    harvestEditRec <- colData |>
+      filter(collectType == 1) |> 
+      summarise(tot = sum(editRec))
+    
+    harvestTotal <- colData |>
+      filter(collectType == 1) |> 
+      summarise(tot = sum(totRec))
     
     precentageEdit <- round(harvestEditRec$tot/harvestTotal$tot * 100, digits = 2)
     
@@ -118,10 +108,11 @@ server <- function(input, output, session) {
   
   #Manual Collections rate
   output$manualNewCollection <- renderInfoBox({
-    manualNewRec <- dataManual_Harvest_Owner |>
-      filter(colType == 2) |> summarise(tot = sum(newRec))
-    manualTotal <- dataManual_Harvest_Owner |>
-      filter(colType == 2) |> summarise(tot = sum(totRec))
+    manualNewRec <- colData |>
+      filter(collectType == 2) |> summarise(tot = sum(newRec))
+    
+    manualTotal <- colData |>
+      filter(collectType == 2) |> summarise(tot = sum(totRec))
     
     precentageNew <- round(manualNewRec$tot/manualTotal$tot * 100, digits = 2)
     
@@ -134,10 +125,11 @@ server <- function(input, output, session) {
   
   
   output$manualEditCollection <- renderInfoBox({
-    manualEditRec <- dataManual_Harvest_Owner |>
-      filter(colType == 2) |> summarise(tot = sum(editRec))
-    manualTotal <- dataManual_Harvest_Owner |>
-      filter(colType == 2) |> summarise(tot = sum(totRec))
+    manualEditRec <- colData |>
+      filter(collectType == 2) |> summarise(tot = sum(editRec))
+    
+    manualTotal <- colData |>
+      filter(collectType == 2) |> summarise(tot = sum(totRec))
     
     precentageEdit <- round(manualEditRec$tot/manualTotal$tot * 100, digits = 2)
     
@@ -148,10 +140,9 @@ server <- function(input, output, session) {
     
   })
   
+#### ******************************* Data Gap *********************************** ####  
+  
   output$dataGap <- renderDataTable({
-    #colTrend <- read.csv("../../raw_data/finList.csv")
-    
-    #df <- colTrend |> filter(id == input$datFlow)
     
     dataTrend <- dataManual_Harvest_Owner %>%
       filter(provid == input$datFlow)
@@ -241,12 +232,74 @@ server <- function(input, output, session) {
       
     })
     
+    
+#### **************************** Data Registration ***************************** ####
+    
+    dataReg <- reactive(data.frame(recFlow = character(),
+                                   recDate = as.Date(character()),
+                                   sender = character(),
+                                   producer = character(),
+                                   chanType = character(),
+                                   regDate = as.Date(character()),
+                                   regOfficer = character(),
+                                   stringsAsFactors = FALSE ))
+    
+    #Append data when submit button is clicked
+    observeEvent(input$submitReg, {
+      new_reg <- data.frame(
+        recFlow = input$recFlow,
+        recDate = input$recDate,
+        sender = input$sender,
+        producer = input$producer,
+        chanType = input$chanType,
+        regDate = date(),
+        regOfficer = Sys.getenv("USERNAME"),
+        stringsAsFactors = FALSE
+      )
+      
+      data(rbind(dataReg(), new_reg))
+      regdatafile <- rbind(data(), new_reg)
+      regdatafile <- unique(regdatafile)
+      
+      write.csv(regdatafile, "../../output/regdatafile.csv", row.names = FALSE)
+      
+      # Reset input fields
+      updateTextInput(session, "recFlow", value = "")
+      updateTextInput(session, "recDate", value = NULL)
+      updateTextInput(session, "sender", value = "")
+      updateTextInput(session, "producer", value = "")
+      updateTextInput(session, "chanType", value = "")
+      
+    })
 
+    # Clear all data
+    observeEvent(input$clearReg, {
+      dataReg(data.frame(recFlow = character(), 
+                      recDate = as.Date(character()), 
+                      sender = character(), 
+                      producer = character(), 
+                      chanType = numeric(), 
+                      stringsAsFactors = FALSE))
+    })
+    
+    # Render table
+    output$tableReg <- renderDT({
+      datatable(data(), editable = TRUE)
+    })
+    
+    # Download data
+    output$downloadReg <- downloadHandler(
+      filename = function() { "data_registration.csv" },
+      content = function(file) {
+        write.csv(data(), file, row.names = FALSE)
+      }
+    )
+    
     
 #### *************************** Data Entry Section **************************** ####
 
     # Reactive dataframe
-     data <- reactiveVal(data.frame(id = character(),
+     data <- reactiveVal(data.frame(dataFlow = character(),
                                     colType = numeric(),
                                     colDate = as.Date(character()), 
                                     upDate = as.Date(character()), 
@@ -258,19 +311,42 @@ server <- function(input, output, session) {
     # Append data when Submit button is clicked
     observeEvent(input$submit, {
       new_entry <- data.frame(
-        id = input$dataFlow,
+        dataFlow = input$dataFlow,
         colType = input$colType,
         colDate = as.Date(input$colDate),
         upDate = as.Date(input$upDate),
         totRec = input$totRec,
         newRec = input$newRec,
         editRec = input$editRec,
+        regDate = date(),
+        regOfficer = Sys.getenv("USERNAME"),
         stringsAsFactors = FALSE
       )
       data(rbind(data(), new_entry))
       
+      datafile <- rbind(data(), new_entry)
+      datafile <- unique(datafile)
+      datafile <- datafile |> 
+        rename(id = dataFlow, collectType = colType)
+      
+      
+      datafile$colDate <- format(datafile$colDate, "%d-%b-%Y")
+      datafile$upDate <- format(datafile$upDate, "%d-%b-%Y")
+      
+      colData <- rbind(colData, datafile)
+      
+      
+      #Check for common fields.
+      
+      #common_cols <- intersect(names(datafile), names(dataHarvest))
+      #dataResult <- rbind(dataHarvest[common_cols], datafile[common_cols])
+      
+      
+      #write.csv(dataResult, "../../raw_data/datafile.csv", row.names = FALSE)
+      write.csv(colData, "../../raw_data/colData.csv", row.names = FALSE)
+      
       # Reset input fields
-      updateTextInput(session, "id", value = "")
+      updateTextInput(session, "dataFlow", value = "")
       updateNumericInput(session, "colType", value = "")
       updateTextInput(session, "colDate", value = NULL)
       updateTextInput(session, "upDate", value = "")
