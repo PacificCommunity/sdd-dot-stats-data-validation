@@ -15,34 +15,37 @@ library(rsdmx)
 repository <- file.path(dirname(rstudioapi::getSourceEditorContext()$path))
 setwd(repository)
 
-#### *********************** Load datasets ****************************** ####
-#Get dataflow list from PDH .STAT
+source("setup.R")
+
 dfList <- as.data.frame(readSDMX(providerId = "PDH", resource = "dataflow"))
 
 datProducers <- read.csv("../../raw_data/datProducers.csv")
 datOwners <- read.csv("../../raw_data/dataOwners.csv")
-
-  datOwners <- datOwners |>
-  select(id, Label, respDept, respSect, respTopic, contactPerson, colType, status)
-
 colData <- read.csv("../../raw_data/colData.csv")
 
-colData <- colData |> filter(!is.na(totRec) & !is.na(newRec) & !is.na(editRec)) 
-
-collection <- sum(colData$totRec)
-newRec <- sum(colData$newRec)
-editRec <- sum(colData$editRec)
-
-# Data owner groupings sub-tables
-
-#deptGroup <- dataOwners |> filter(respDept !="") |> group_by(respDept) |> summarise(numDF = n())
-sectGroup <- datOwners |> filter(respSect !="") |> group_by(respSect) |> summarise(numDF = n())
-indvGroup <- datOwners |> filter(contactPerson !="") |> group_by(contactPerson) |> summarise(numDF = n())
-
-#### *********************** Server section ************************************ ####
 
 # Server: Backend logic
 server <- function(input, output, session) {
+  
+#### *********************** Load datasets ****************************** ####
+  #Get dataflow list from PDH .STAT
+  
+  datOwners <- datOwners |>
+    select(id, Label, respDept, respSect, respTopic, contactPerson, colType, status)
+  
+  colData <- colData |> filter(!is.na(totRec) & !is.na(newRec) & !is.na(editRec)) 
+  
+  collection <- sum(colData$totRec)
+  newRec <- sum(colData$newRec)
+  editRec <- sum(colData$editRec)
+  
+  # Data owner groupings sub-tables
+  
+  #deptGroup <- dataOwners |> filter(respDept !="") |> group_by(respDept) |> summarise(numDF = n())
+  sectGroup <- datOwners |> filter(respSect !="") |> group_by(respSect) |> summarise(numDF = n())
+  indvGroup <- datOwners |> filter(contactPerson !="") |> group_by(contactPerson) |> summarise(numDF = n())
+  
+#### ********************************* Dashboard Section ******************************* ####
   
   #Calculate the percentage of new collections
   output$newCollection <- renderInfoBox({
@@ -142,20 +145,10 @@ server <- function(input, output, session) {
   
 #### ******************************* Data Gap *********************************** ####  
   
-  output$dataGap <- renderDataTable({
-    
-    dataTrend <- dataManual_Harvest_Owner %>%
-      filter(provid == input$datFlow)
-    
-    provSelectedSummary <<- provSelected
-    
-    plot_ly(provSelectedSummary, x = ~acname, y = ~frHouseholds, type = 'bar', name = 'Baseline') %>%
-      add_trace(y = ~colHouseholds, name='Collection')
-    
-  })
-  
-  
   output$dataTrend <- DT::renderDataTable({
+    
+    dataCollection <- read.csv("../../raw_data/colData.csv")
+    dataManual_Harvest_Owner <- merge(dataCollection, datOwners)
     
     dataTrend_DT <- dataManual_Harvest_Owner |>
       filter(id == input$datFlow) |>
@@ -164,9 +157,8 @@ server <- function(input, output, session) {
     datatable(dataTrend_DT)
   })
   
-  
   output$sectDataOwner <- DT::renderDataTable({
-    sectDF <- dataOwners
+    sectDF <- datOwners
     
     sectDF <- sectDF |>
       filter(respSect == input$section) |>
@@ -175,14 +167,13 @@ server <- function(input, output, session) {
   })
   
   output$indvDataOwner <- DT::renderDataTable({
-    indvDF <- dataOwners
+    indvDF <- datOwners
     
     indvDF <- indvDF |>
       filter(contactPerson == input$owner) |>
       
       datatable(indvDF)
   })
-  
   
   output$histRecords <- DT::renderDataTable({
     histRecs <- read.csv("../../raw_data/finList.csv")
@@ -193,7 +184,6 @@ server <- function(input, output, session) {
     
     datatable(histRecs)
   })
-  
   
   dfName <- reactive({
     df <- input$dfName
@@ -337,7 +327,6 @@ server <- function(input, output, session) {
       
       
       #Check for common fields.
-      
       #common_cols <- intersect(names(datafile), names(dataHarvest))
       #dataResult <- rbind(dataHarvest[common_cols], datafile[common_cols])
       
@@ -378,7 +367,6 @@ server <- function(input, output, session) {
         write.csv(data(), file, row.names = FALSE)
       }
     )
-    
   
 } #End server funtion
 

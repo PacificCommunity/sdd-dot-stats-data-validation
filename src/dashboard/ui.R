@@ -73,7 +73,7 @@ shinyUI(dashboardPage(
               fluidRow(
                 selectInput("datFlow", "Select Data Flow:", choices = dfList$id, selected = 1)
               ),
-              fluidRow(hr(h2("Table showing the provincial collections by Area Council"))),
+              fluidRow(hr(h2("Table showing the collections overtime"))),
               fluidRow(dataTableOutput("dataTrend"))
               
       ),
