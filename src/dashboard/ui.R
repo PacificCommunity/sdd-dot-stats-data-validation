@@ -55,7 +55,7 @@ shinyUI(dashboardPage(
       ),
       tabItem(tabName = "sectOwner", h2("Section Data Flows Owners"),
               fluidRow(
-                selectInput("section", "Select section:", choices = sectGroup$respSect, selected = 1)),
+              selectInput("section", "Select section:", choices = sectGroup$respSect, selected = 1)),
               fluidRow(hr(h2("Table showing the Data flows with ownership from selected section"))),
               fluidRow(dataTableOutput("sectDataOwner"))  
               
@@ -63,7 +63,7 @@ shinyUI(dashboardPage(
       
       tabItem(tabName = "indvOwner", h2("Individial data flow owners"),
               fluidRow(
-                selectInput("owner", "Select Individual owner:", choices = indvGroup$contactPerson, selected = 1 )),
+              selectInput("owner", "Select Individual owner:", choices = indvGroup$contactPerson, selected = 1 )),
               fluidRow(hr(h2("Table showing the Data flows with ownership from the selected inidividual"))),
               fluidRow(dataTableOutput("indvDataOwner"))
               

@@ -23,27 +23,27 @@ datProducers <- read.csv("../../raw_data/datProducers.csv")
 datOwners <- read.csv("../../raw_data/dataOwners.csv")
 colData <- read.csv("../../raw_data/colData.csv")
 
+#### *********************** Load datasets ****************************** ####
+#Get dataflow list from PDH .STAT
+
+datOwners <- datOwners |>
+  select(id, Label, respDept, respSect, respTopic, contactPerson, colType, status)
+
+colData <- colData |> filter(!is.na(totRec) & !is.na(newRec) & !is.na(editRec)) 
+
+collection <- sum(colData$totRec)
+newRec <- sum(colData$newRec)
+editRec <- sum(colData$editRec)
+
+# Data owner groupings sub-tables
+
+#deptGroup <- dataOwners |> filter(respDept !="") |> group_by(respDept) |> summarise(numDF = n())
+sectGroup <- datOwners |> filter(respSect !="") |> group_by(respSect) |> summarise(numDF = n())
+indvGroup <- datOwners |> filter(contactPerson !="") |> group_by(contactPerson) |> summarise(numDF = n())
+
 
 # Server: Backend logic
 server <- function(input, output, session) {
-  
-#### *********************** Load datasets ****************************** ####
-  #Get dataflow list from PDH .STAT
-  
-  datOwners <- datOwners |>
-    select(id, Label, respDept, respSect, respTopic, contactPerson, colType, status)
-  
-  colData <- colData |> filter(!is.na(totRec) & !is.na(newRec) & !is.na(editRec)) 
-  
-  collection <- sum(colData$totRec)
-  newRec <- sum(colData$newRec)
-  editRec <- sum(colData$editRec)
-  
-  # Data owner groupings sub-tables
-  
-  #deptGroup <- dataOwners |> filter(respDept !="") |> group_by(respDept) |> summarise(numDF = n())
-  sectGroup <- datOwners |> filter(respSect !="") |> group_by(respSect) |> summarise(numDF = n())
-  indvGroup <- datOwners |> filter(contactPerson !="") |> group_by(contactPerson) |> summarise(numDF = n())
   
 #### ********************************* Dashboard Section ******************************* ####
   
