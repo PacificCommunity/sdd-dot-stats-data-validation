@@ -94,22 +94,63 @@ shinyUI(dashboardPage(
       ),
       
       tabItem(tabName = "datReg", h2("Incoming dataset registration"),
-              fluidRow(selectInput("recFlow", "Select data flow:", choices = dfList$id, selected = 1)),
-              fluidRow(dateInput("recDate", "Enter date received:", format = "yyyy-mm-dd")),
-              fluidRow(textInput("sender", "Enter the name of the Sender:")),
-              fluidRow(selectInput("producer", "Select where the data is coming from:", choices = datProducers$producerID)),
-              fluidRow(selectInput("chanType", "Select channel through data was received:", choices = c("Email" = 1, "Web harvesting" = 2, "File transfer" = 3))),
-              fluidRow(hr()),
-              fluidRow(actionButton("submitReg", "Submit")),
-              fluidRow(actionButton("clearReg", "Clear Data")),
+              fluidRow(tags$hr(style = "height: 2px; border-width: 0; background-color: #FF0000; margin-top: 20px; margin-bottom: 20px;")),
+              fluidRow(
+                column(12,
+                       tags$table(
+                         tags$tr(
+                           tags$td("Select dataflow:"),
+                           tags$td(selectInput("recFlow", label = NULL, choices = dfList$id, selected = 1))
+                           ),
+                         tags$tr(
+                           tags$td("Enter date received:"),
+                           tags$td(dateInput("recDate", label = NULL, format = "yyyy-mm-dd"))
+                         ),
+                         tags$tr(
+                           tags$td("Enter name of sender:"),
+                           tags$td(textInput("sender", label = NULL))
+                         ),
+                         tags$tr(
+                           tags$td("Select where the data is coming from:"),
+                           tags$td(selectInput("producer", label = NULL, choices = datProducers$producerDesc))
+                         ),
+                         tags$tr(
+                           tags$td("Select channel through data was received:"),
+                           tags$td(selectInput("chanType", label = NULL, choices = c("Email" = 1, "Web harvesting" = 2, "File transfer" = 3)))
+                         ),
+                         tags$tr(
+                           tags$td("Actions:"),
+                           tags$td(
+                             div(
+                               actionButton("submit", "Submit", style = "margin-right: 10px;"),
+                               actionButton("clear", "Clear")
+                             )
+                           )
+                         )
+                        )
+                      )
+                    ),
+              fluidRow(tags$hr(style = "height: 2px; border-width: 0; background-color: #FF0000; margin-top: 20px; margin-bottom: 20px;")),
               fluidRow(DTOutput("tableReg")),
               fluidRow(downloadButton("downloadReg", "Download Data"))
               ),
+                
+              #  selectInput("recFlow", "Select data flow:", choices = dfList$id, selected = 1)),
+              #fluidRow(dateInput("recDate", "Enter date received:", format = "yyyy-mm-dd")),
+              #fluidRow(textInput("sender", "Enter the name of the Sender:")),
+              #fluidRow(selectInput("producer", "Select where the data is coming from:", choices = datProducers$producerID)),
+              #fluidRow(selectInput("chanType", "Select channel through data was received:", choices = c("Email" = 1, "Web harvesting" = 2, "File transfer" = 3))),
+              #fluidRow(hr()),
+              #fluidRow(actionButton("submitReg", "Submit")),
+              #fluidRow(actionButton("clearReg", "Clear Data")),
+              #fluidRow(DTOutput("tableReg")),
+              #fluidRow(downloadButton("downloadReg", "Download Data"))
+              #),
       
       tabItem(tabName = "dataEntry", h2("Manual Uploaded register update"),
               fluidRow(tags$hr(style = "height: 2px; border-width: 0; background-color: #FF0000; margin-top: 20px; margin-bottom: 20px;")),
               fluidRow(
-                column(6, 
+                column(12, 
                        tags$table(
                          tags$tr(
                            tags$td("Select Dataflow:"),
@@ -148,17 +189,14 @@ shinyUI(dashboardPage(
                              )
                            )
                          )
-                         
-                         )
-                       )
-                       
+                        )
+                      )
                     ),
               fluidRow(tags$hr(style = "height: 2px; border-width: 0; background-color: #FF0000; margin-top: 20px; margin-bottom: 20px;")),
               fluidRow(DTOutput("table")),
               fluidRow(downloadButton("download", "Download Data"))
             )
         )
-            
     )
   )
 )
