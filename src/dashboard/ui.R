@@ -107,23 +107,59 @@ shinyUI(dashboardPage(
               ),
       
       tabItem(tabName = "dataEntry", h2("Manual Uploaded register update"),
-              fluidRow(hr()),
-              fluidRow(selectInput("dataFlow", "Select data flow:", choices = dfList$id, selected = 1)),
-              fluidRow(selectInput("colType", "Select the Collection type:", choices = c("Manual Collection" = 2, "Harvesting" = 1))),
-              fluidRow(dateInput("colDate", "Collection Date", format = "yyyy-mm-dd"),
-                       dateInput("upDate", "Upload Date", format = "yyyy-mm-dd")
-                       ),
-              fluidRow(numericInput("totRec", "Total records", 0)),
-              fluidRow(numericInput("newRec", "New records", 0)),
-              fluidRow(numericInput("editRec", "Edited records", 0)),
-              fluidRow(hr()),
-              fluidRow(actionButton("submit", "Submit")),
-              fluidRow(actionButton("clear", "Clear Data")),
+              fluidRow(tags$hr(style = "height: 2px; border-width: 0; background-color: #FF0000; margin-top: 20px; margin-bottom: 20px;")),
+              fluidRow(
+                column(6, 
+                       tags$table(
+                         tags$tr(
+                           tags$td("Select Dataflow:"),
+                           tags$td(selectInput("dataFlow", label = NULL, choices = dfList$id, selected = 1))
+                           ),
+                         tags$tr(
+                           tags$td("Select collection type:"),
+                           tags$td(selectInput("colType", label = NULL, choices = c("Manual Collection" = 2, "Harvesting" = 1)))
+                         ),
+                         tags$tr(
+                           tags$td("Select collection date:"),
+                           tags$td(dateInput("colDate", label = NULL, format = "yyyy-mm-dd"))
+                         ),
+                         tags$tr(
+                           tags$td("Select upload date:"),
+                           tags$td(dateInput("upDate", label = NULL, format = "yyyy-mm-dd"))
+                         ),
+                         tags$tr(
+                           tags$td("Total records:"),
+                           tags$td(numericInput("totRec", label = NULL, 0))
+                         ),
+                         tags$tr(
+                           tags$td("New records:"),
+                           tags$td(numericInput("newRec", label = NULL, 0))
+                         ),
+                         tags$tr(
+                           tags$td("Edited records"),
+                           tags$td(numericInput("editRec", label = NULL, 0))
+                         ),
+                         tags$tr(
+                           tags$td("Actions:"),
+                           tags$td(
+                             div(
+                               actionButton("submit", "Submit", style = "margin-right: 10px;"),
+                               actionButton("clear", "Clear")
+                             )
+                           )
+                         )
+                         
+                         )
+                       )
+                       
+                    ),
+              fluidRow(tags$hr(style = "height: 2px; border-width: 0; background-color: #FF0000; margin-top: 20px; margin-bottom: 20px;")),
               fluidRow(DTOutput("table")),
               fluidRow(downloadButton("download", "Download Data"))
-              )
+            )
+        )
+            
     )
   )
-)
 )
 
