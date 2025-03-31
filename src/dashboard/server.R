@@ -41,7 +41,6 @@ editRec <- sum(colData$editRec)
 sectGroup <- datOwners |> filter(respSect !="") |> group_by(respSect) |> summarise(numDF = n())
 indvGroup <- datOwners |> filter(contactPerson !="") |> group_by(contactPerson) |> summarise(numDF = n())
 
-
 # Server: Backend logic
 server <- function(input, output, session) {
   
@@ -251,6 +250,7 @@ server <- function(input, output, session) {
       regdatafile <- rbind(data(), new_reg)
       regdatafile <- unique(regdatafile)
       
+      
       write.csv(regdatafile, "../../output/regdatafile.csv", row.names = FALSE)
       
       # Reset input fields
@@ -325,13 +325,7 @@ server <- function(input, output, session) {
       
       colData <- rbind(colData, datafile)
       
-      
-      #Check for common fields.
-      #common_cols <- intersect(names(datafile), names(dataHarvest))
-      #dataResult <- rbind(dataHarvest[common_cols], datafile[common_cols])
-      
-      
-      #write.csv(dataResult, "../../raw_data/datafile.csv", row.names = FALSE)
+      #Write final data to output data file
       write.csv(colData, "../../raw_data/colData.csv", row.names = FALSE)
       
       # Reset input fields

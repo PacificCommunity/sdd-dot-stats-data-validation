@@ -13,7 +13,7 @@ dfList <- dfList |> select(id, Name.en) |> rename(Label = Name.en)
 dfList <- dfList |> distinct()
 
 finList <- read.csv("../raw_data/finList.csv")
-finList <- finList |> select(id, Date, records) 
+#finList <- finList |> select(id, Date, records) 
   
 sheetName = "df_records"
 
@@ -23,6 +23,14 @@ counter = 1
 
 #Loop to extract the number of records per dataflow
 list <- nrow(dfList)
+
+#Declaration of an empty dataframe
+df_records <- data.frame(
+  id = "",
+  Date = "",
+  records = ""
+  
+)
 
 while (counter <= list){
   selected_df <- dfList[counter, ]
@@ -37,14 +45,20 @@ while (counter <= list){
     group_by(id, Date) |>
     summarise(records = n())
   
-  finList <- rbind(finList, df_rec)  
+  #Populate the empty dataframe
+  df_records <- rbind(df_records, df_rec)  
   
   counter <- counter + 1 
 }
 
 #get the data flow label
-finList <- merge(finList, dfList, by = "id")
-finList$Date <- dmy(finList$Date)
+finList <- merge(finList, dfList, by = "id", all = TRUE)
+
+mydate = Sys.Date()
+
+finList$date = ""
+
+finList <- finList |> replace(mydate = date)
 
 #Add data to excel workbook
 addWorksheet(wb, sheetName)
