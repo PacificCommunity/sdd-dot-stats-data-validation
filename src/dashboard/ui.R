@@ -135,18 +135,7 @@ shinyUI(dashboardPage(
               fluidRow(downloadButton("downloadReg", "Download Data"))
               ),
                 
-              #  selectInput("recFlow", "Select data flow:", choices = dfList$id, selected = 1)),
-              #fluidRow(dateInput("recDate", "Enter date received:", format = "yyyy-mm-dd")),
-              #fluidRow(textInput("sender", "Enter the name of the Sender:")),
-              #fluidRow(selectInput("producer", "Select where the data is coming from:", choices = datProducers$producerID)),
-              #fluidRow(selectInput("chanType", "Select channel through data was received:", choices = c("Email" = 1, "Web harvesting" = 2, "File transfer" = 3))),
-              #fluidRow(hr()),
-              #fluidRow(actionButton("submitReg", "Submit")),
-              #fluidRow(actionButton("clearReg", "Clear Data")),
-              #fluidRow(DTOutput("tableReg")),
-              #fluidRow(downloadButton("downloadReg", "Download Data"))
-              #),
-      
+
       tabItem(tabName = "dataEntry", h2("Manual Uploaded register update"),
               fluidRow(tags$hr(style = "height: 2px; border-width: 0; background-color: #FF0000; margin-top: 20px; margin-bottom: 20px;")),
               fluidRow(
