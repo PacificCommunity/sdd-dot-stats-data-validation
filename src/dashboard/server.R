@@ -216,7 +216,10 @@ server <- function(input, output, session) {
         formatStyle(
           columns = colnames(datTable),                # Apply styling to all columns
           target = "cell",
-          backgroundColor = styleEqual("No data", "red", "green") # Set red background if cell equals "No Data"
+          backgroundColor = styleEqual(c("No data", "Data"),
+                                       c("red", "green"),
+                                       default = "white"
+                                       ) # Set red background if cell equals "No Data"
         )
       
     })
