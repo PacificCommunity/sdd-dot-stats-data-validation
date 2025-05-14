@@ -12,9 +12,9 @@ dataFlows <- data.frame(
 )
 
 dfCount <- nrow(dfList)
-i = 51
+i = 1
 
-while (i <= 55) {
+while (i <= dfCount) {
   dfName <- dfList[i, 1]
   dfData <- as.data.frame(readSDMX(providerId="PDH", resource="data", flowRef= dfName))
   if(!"INDICATOR" %in% colnames(dfData)){
