@@ -223,7 +223,38 @@ server <- function(input, output, session) {
       
     })
     
+
+#### **************************** Data Heat Map ***************************** ####
+
+    output$dataHeat <- renderPlot({
+      df <- read.csv("../../raw_data/dflows_last_update.csv")
+      colType <- datOwners |> select(id, colType) |> rename(dflow = id)
+      df <- merge(df, colType, by = "dflow")
+        
+      df <- df |>
+        filter(colType == 2) |>
+        mutate(dflow = factor(dflow, levels = dflow[order(lastupdated)])) |>
+        select(-colType)
+      
+      # Heatmap style chart
+      ggplot(df, aes(x = "", y = dflow, fill = lastupdated)) +
+        geom_tile(color = "white") +
+        scale_fill_gradient(low = "green", high = "red", trans = "reverse") +
+        labs(
+          title = "Heatmap of Data Flows by Last Updated Year",
+          fill = "Last Updated",
+          y = "Data Flow",
+          x = NULL
+        ) +
+        theme_minimal() +
+        theme(
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank()
+        )
+      
+    })    
     
+
 #### **************************** Data Registration ***************************** ####
     
     dataReg <- reactive(data.frame(recFlow = character(),
