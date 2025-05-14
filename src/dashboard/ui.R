@@ -24,7 +24,8 @@ shinyUI(dashboardPage(
       menuItem("Data Collections", tabName = "dataCol", icon = icon("bar-chart-o")),
       menuItem("Historical updates", tabName = "histUpdates", icon = icon("bar-chart-o")),
       menuItem("Data Gaps", tabName = "dataGap", icon = icon("bar-chart-o")),
-      menuItem("Dataset Registration", tabName = "datReg", icon = icon("bar-chart-o")),
+      menuItem("Data Heat Map", tabName = "dataHeat", icon = icon("bar-chart-o")),
+      #menuItem("Dataset Registration", tabName = "datReg", icon = icon("bar-chart-o")),
       menuItem("Data Entry", tabName = "dataEntry", icon = icon("bar-chart-o"))
       
     )
@@ -92,6 +93,10 @@ shinyUI(dashboardPage(
               fluidRow(dataTableOutput("dataGap"))
               
       ),
+      
+      tabItem(tabName = "dataHeat", h1("Heatmap of the dataflow latest updates"),
+              fluidRow(plotOutput("dataHeat", height = "100vh"))
+              ),
       
       tabItem(tabName = "datReg", h2("Incoming dataset registration"),
               fluidRow(tags$hr(style = "height: 2px; border-width: 0; background-color: #FF0000; margin-top: 20px; margin-bottom: 20px;")),
@@ -186,8 +191,8 @@ shinyUI(dashboardPage(
                       )
                     ),
               fluidRow(tags$hr(style = "height: 2px; border-width: 0; background-color: #FF0000; margin-top: 20px; margin-bottom: 20px;")),
-              fluidRow(DTOutput("table")),
-              fluidRow(downloadButton("download", "Download Data"))
+              fluidRow(DTOutput("table"))
+              #fluidRow(downloadButton("download", "Download Data"))
             )
         )
     )
