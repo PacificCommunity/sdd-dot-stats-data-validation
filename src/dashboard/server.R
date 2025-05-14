@@ -68,7 +68,6 @@ server <- function(input, output, session) {
     
   })
   
-  
   #Harvesting Collections rate
   output$harvestNewCollection <- renderInfoBox({
     harvestNewRec <- colData |>
@@ -298,7 +297,8 @@ server <- function(input, output, session) {
                                     upDate = as.Date(character()), 
                                     totRec = numeric(), 
                                     newRec = numeric(), 
-                                    editRec = numeric(), 
+                                    editRec = numeric(),
+                                    remarks = character(),
                                     stringsAsFactors = FALSE))
     
     # Append data when Submit button is clicked
@@ -311,6 +311,7 @@ server <- function(input, output, session) {
         totRec = input$totRec,
         newRec = input$newRec,
         editRec = input$editRec,
+        remarks = input$remarks,
         regDate = date(),
         regOfficer = Sys.getenv("USERNAME"),
         stringsAsFactors = FALSE
@@ -339,6 +340,7 @@ server <- function(input, output, session) {
       updateNumericInput(session, "totRec", value = "")
       updateNumericInput(session, "newRec", value = "")
       updateNumericInput(session, "editRec", value = "")
+      updateTextInput(session, "remarks", value = "")
     })
     
     # Clear all data
@@ -348,7 +350,8 @@ server <- function(input, output, session) {
                       upDate = as.Date(character()), 
                       totRec = numeric(), 
                       newRec = numeric(), 
-                      editRec = numeric(),  
+                      editRec = numeric(),
+                      remarks = character(),
                       stringsAsFactors = FALSE))
     })
     

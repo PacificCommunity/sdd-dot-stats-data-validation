@@ -170,6 +170,10 @@ shinyUI(dashboardPage(
                            tags$td(numericInput("editRec", label = NULL, 0))
                          ),
                          tags$tr(
+                           tags$td("Remarks:"),
+                           tags$td(textInput("remarks", label = NULL))
+                         ),
+                         tags$tr(
                            tags$td("Actions:"),
                            tags$td(
                              div(
