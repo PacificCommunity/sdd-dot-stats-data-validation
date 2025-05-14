@@ -32,4 +32,4 @@ dataFlows_dt <- dataFlows |> group_by(dflow, lastUpdate) |> summarise(indicators
 
 dflows_last_update <- dataFlows_dt |> filter(dflow != "") |> group_by(dflow) |> summarise(lastupdated = max(substr(lastUpdate, 1, 4)))
 
-write.csv(dflows_last_update, "c:/temp/dataflows.csv", row.names = FALSE)
+write.csv(dflows_last_update, "../../raw_data/dflows_last_update.csv", row.names = FALSE)
